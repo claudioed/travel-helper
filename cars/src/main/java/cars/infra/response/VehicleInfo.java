@@ -1,6 +1,7 @@
 package cars.infra.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
@@ -13,6 +14,7 @@ public class VehicleInfo {
 
   String transmission;
 
+  @JsonProperty("air_conditioning")
   Boolean airConditioning;
 
   String category;

@@ -1,5 +1,7 @@
 package flights.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
@@ -7,16 +9,19 @@ import lombok.Data;
  * Created by claudio on 07/07/17.
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Flight {
 
-    String destination;
+  String destination;
 
-    String departureDate;
+  @JsonProperty("departure_date")
+  String departureDate;
 
-    String returnDate;
+  @JsonProperty("return_date")
+  String returnDate;
 
-    String price;
+  String price;
 
-    String airline;
+  String airline;
 
 }
