@@ -1,5 +1,6 @@
 package flights.infra.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import flights.domain.Flight;
 import lombok.Data;
 
@@ -10,12 +11,13 @@ import java.util.List;
  * Created by claudio on 07/07/17.
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FlightResponse {
 
-    String origin;
+  String origin;
 
-    String currency;
+  String currency;
 
-    List<Flight> results;
+  List<Flight> results;
 
 }

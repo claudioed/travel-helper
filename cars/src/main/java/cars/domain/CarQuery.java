@@ -11,18 +11,18 @@ import java.time.LocalDateTime;
 @Data
 public class CarQuery {
 
-    Airport airport;
+  Airport airport;
 
-    LocalDateTime pickUp;
+  LocalDateTime pickUp;
 
-    LocalDateTime dropOf;
+  LocalDateTime dropOf;
 
-    public String pickUp(){
-        return this.pickUp.toString();
-    }
+  public String pickUp() {
+    return this.pickUp.toString();
+  }
 
-    public String dropOf(){
-        return this.dropOf.toString();
-    }
+  public String dropOf() {
+    return this.dropOf.toString();
+  }
 
 }
