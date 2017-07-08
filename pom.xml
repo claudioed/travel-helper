@@ -13,6 +13,7 @@
     <module>cars</module>
     <module>points</module>
     <module>ui</module>
+    <module>airport-search</module>
   </modules>
   <packaging>pom</packaging>
 

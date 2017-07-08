@@ -8,10 +8,11 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>cars</artifactId>
+
+  <artifactId>airport-search</artifactId>
 
   <properties>
-    <vertx.verticle>cars.infra.MainVerticle</vertx.verticle>
+    <vertx.verticle>airport.infra.MainVerticle</vertx.verticle>
   </properties>
 
   <dependencies>
@@ -49,7 +50,7 @@
   </dependencies>
 
   <build>
-    <finalName>cars-helper</finalName>
+    <finalName>airport-helper</finalName>
     <plugins>
 
       <plugin>
@@ -58,7 +59,7 @@
         <version>${fabric8.vertx.plugin.version}</version>
         <executions>
           <execution>
-            <id>cars-helper-init-package</id>
+            <id>airport-helper-init-package</id>
             <goals>
               <goal>initialize</goal>
               <goal>package</goal>
@@ -84,7 +85,7 @@
         <configuration>
           <images>
             <image>
-              <name>claudioed/travel-helper-cars</name>
+              <name>claudioed/travel-helper-airport</name>
               <build>
                 <from>openjdk:latest</from>
                 <entryPoint>java -jar /application/${project.build.finalName}.jar</entryPoint>

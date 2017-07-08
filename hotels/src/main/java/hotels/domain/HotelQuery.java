@@ -11,18 +11,18 @@ import java.time.LocalDateTime;
 @Data
 public class HotelQuery {
 
-    Airport airport;
+  Airport airport;
 
-    LocalDateTime checkIn;
+  LocalDateTime checkIn;
 
-    LocalDateTime checkOut;
+  LocalDateTime checkOut;
 
-    public String checkIn(){
-        return this.checkIn.toString();
-    }
+  public String checkIn() {
+    return this.checkIn.toString();
+  }
 
-    public String checkOut(){
-        return this.checkOut.toString();
-    }
+  public String checkOut() {
+    return this.checkOut.toString();
+  }
 
 }

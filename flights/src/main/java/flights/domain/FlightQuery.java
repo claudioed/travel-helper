@@ -11,16 +11,16 @@ import java.time.LocalDateTime;
 @Data
 public class FlightQuery {
 
-    Airport origin;
+  Airport origin;
 
-    Airport destination;
+  Airport destination;
 
-    LocalDateTime departureAt;
+  LocalDateTime departureAt;
 
-    Integer days;
+  Integer days;
 
-    public String departure(){
-        return this.departureAt.toString();
-    }
+  public String departure() {
+    return this.departureAt.toString();
+  }
 
 }
