@@ -9,6 +9,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.core.AbstractVerticle;
 import io.vertx.rxjava.ext.web.client.WebClient;
+import java.io.IOException;
 import lombok.SneakyThrows;
 import rx.Observable;
 
@@ -31,20 +32,29 @@ public class RequestHotelsVerticle extends AbstractVerticle {
   private static final String HOTELS_REQUESTER_EB = "request-hotel-eb";
 
   @Override
-  @SneakyThrows
   public void start() throws Exception {
     final String apiKey = System.getenv("AMADEUS_API_KEY");
     final WebClient webClient = WebClient.create(this.vertx);
     this.vertx.eventBus().consumer(HOTELS_REQUESTER_EB, handler -> {
-      final HotelQuery hotelQuery = MAPPER.readValue(handler.body().toString(), HotelQuery.class);
-      final String target = String
-          .format(HOTELS_URI, apiKey, hotelQuery.getAirport().getAirport(), hotelQuery.checkIn(),
-              hotelQuery.checkOut());
-      webClient.get(target).rxSend().subscribe(bufferHttpResponse -> {
-        final HotelResponse hotelResponse = MAPPER.readValue(bufferHttpResponse.bodyAsString(), HotelResponse.class);
-        Observable.from(hotelResponse.getResults()).delaySubscription(2, TimeUnit.SECONDS)
-            .subscribe(data -> vertx.eventBus().send(HOTELS_DATA_STREAM, data));
-      }, throwable -> LOGGER.error("Error on try to get HOTELS", throwable));
+      try {
+        final HotelQuery hotelQuery = MAPPER.readValue(handler.body().toString(), HotelQuery.class);
+        final String target = String
+            .format(HOTELS_URI, apiKey, hotelQuery.getAirport().getAirport(), hotelQuery.checkIn(),
+                hotelQuery.checkOut());
+        webClient.get(target).rxSend().subscribe(bufferHttpResponse -> {
+          try {
+            final HotelResponse hotelResponse = MAPPER
+                .readValue(bufferHttpResponse.bodyAsString(), HotelResponse.class);
+            Observable.from(hotelResponse.getResults()).delaySubscription(2, TimeUnit.SECONDS)
+                .subscribe(data -> vertx.eventBus().send(HOTELS_DATA_STREAM, data));
+          } catch (Exception ex) {
+            LOGGER.error("Error on deserialize object");
+          }
+        }, throwable -> LOGGER.error("Error on try to get HOTELS", throwable));
+      } catch (IOException e) {
+        LOGGER.error("Error on deserialize object");
+      }
+
     });
   }
 
