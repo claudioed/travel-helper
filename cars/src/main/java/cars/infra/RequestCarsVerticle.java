@@ -38,9 +38,9 @@ public class RequestCarsVerticle extends AbstractVerticle {
       try {
         final CarQuery carQuery = MAPPER.readValue(handler.body().toString(), CarQuery.class);
         final String target = String
-            .format(CARS_URI, apiKey, carQuery.getAirport().getValue(), carQuery.pickUp(),
-                carQuery.dropOf());
-        webClient.get(target).rxSend().subscribe(bufferHttpResponse -> {
+            .format(CARS_URI, apiKey, carQuery.getAirport().getValue(), carQuery.getPickUp(),
+                carQuery.getDropOf());
+        webClient.getAbs(target).rxSend().subscribe(bufferHttpResponse -> {
           try {
             final CarRentalResponse carRentalResponse = MAPPER
                 .readValue(bufferHttpResponse.bodyAsString(), CarRentalResponse.class);

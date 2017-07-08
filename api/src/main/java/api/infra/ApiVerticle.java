@@ -12,6 +12,7 @@ import io.vertx.rxjava.ext.web.Router;
 import io.vertx.rxjava.ext.web.handler.BodyHandler;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Api Verticle
@@ -38,8 +39,11 @@ public class ApiVerticle extends AbstractVerticle {
             try {
               final TravelAirports airports = MAPPER.readValue(reply.result().body().toString(), TravelAirports.class);
               LOGGER.info(String.format("travel airports RECEIVED from %s to %s",airports.getOrigin().toString(),airports.getDestination().toString()));
+              final String pickUp = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE);
+              final String dropOf = LocalDateTime.now().plusDays(8)
+                  .format(DateTimeFormatter.ISO_DATE);
               final CarQuery carQuery = CarQuery.builder().airport(airports.getDestination())
-                  .pickUp(LocalDateTime.now()).dropOf(LocalDateTime.now().plusDays(8)).build();
+                  .pickUp(pickUp).dropOf(dropOf).build();
               vertx.eventBus().publish(Endpoints.CARS_REQUESTER_EB,MAPPER.writeValueAsString(carQuery));
             } catch (IOException e) {
               LOGGER.error("Error on deserialize travel airports",e);

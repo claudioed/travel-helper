@@ -19,16 +19,8 @@ public class CarQuery {
 
   Airport airport;
 
-  LocalDateTime pickUp;
+  String pickUp;
 
-  LocalDateTime dropOf;
-
-  public String pickUp() {
-    return this.pickUp.toString();
-  }
-
-  public String dropOf() {
-    return this.dropOf.toString();
-  }
+  String dropOf;
 
 }

@@ -1,28 +1,20 @@
 package cars.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 /**
  * Car Query
  * Created by claudio on 07/07/17.
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CarQuery {
 
   Airport airport;
 
-  LocalDateTime pickUp;
+  String pickUp;
 
-  LocalDateTime dropOf;
-
-  public String pickUp() {
-    return this.pickUp.toString();
-  }
-
-  public String dropOf() {
-    return this.dropOf.toString();
-  }
+  String dropOf;
 
 }
