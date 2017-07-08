@@ -1,0 +1,54 @@
+version: "3"
+
+services:
+
+  hotel:
+    image: claudioed/travel-helper-hotels
+    container_name: hotel
+    networks:
+      - travel-developer
+
+  point:
+    image: claudioed/travel-helper-points
+    container_name: point
+    networks:
+      - travel-developer
+
+  car:
+    image: claudioed/travel-helper-cars
+    container_name: car
+    networks:
+      - travel-developer
+
+  flight:
+    image: claudioed/travel-helper-flights
+    container_name: flight
+    networks:
+      - travel-developer
+
+  airport:
+    image: claudioed/travel-helper-airport
+    container_name: airport
+    networks:
+      - travel-developer
+
+  ui:
+    image: claudioed/travel-helper-ui
+    container_name: ui
+    ports:
+      - 9090:9090
+    networks:
+      - travel-developer
+
+  api:
+    image: claudioed/travel-helper-api
+    container_name: api
+    ports:
+      - 8888:8888
+    networks:
+      - travel-developer
+
+
+
+networks:
+  travel-developer:
