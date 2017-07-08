@@ -40,21 +40,23 @@ public class SearchAirportVerticle extends AbstractVerticle {
     this.vertx.eventBus().consumer(AIRPORT_REQUESTER_EB, handler -> {
       try {
         final AirportQuery query = MAPPER.readValue(handler.body().toString(), AirportQuery.class);
-
+        LOGGER.info(String.format("Receiving airport search from %s to %s ", query.getOrigin(),query.getDestination()));
         final String originUrl = String.format(AIRPORT_URI, apiKey, query.getOrigin());
         final String destinationUrl = String.format(AIRPORT_URI, apiKey, query.getDestination());
-
         final Single<HttpResponse<Buffer>> originResponse = webClient.getAbs(originUrl).rxSend();
         final Single<HttpResponse<Buffer>> destinationResponse = webClient.getAbs(destinationUrl)
             .rxSend();
-
         originResponse.zipWith(destinationResponse,
             (firstResponse, secondResponse) -> {
               try {
                 List<Airport> originAirports = MAPPER.readValue(firstResponse.bodyAsString(), AIRPORT_RESPONSE);
                 List<Airport> destinationAirports = MAPPER.readValue(secondResponse.bodyAsString(), AIRPORT_RESPONSE);
-                return TravelAirport.builder().destination(destinationAirports.get(0))
+
+                final TravelAirport travelAirport = TravelAirport.builder()
+                    .destination(destinationAirports.get(0))
                     .origin(originAirports.get(0)).build();
+                LOGGER.info(String.format("Success on search airport from %s to %s ", travelAirport.getOrigin().toString(),travelAirport.getDestination().toString()));
+                return travelAirport;
               } catch (IOException e) {
                 LOGGER.error("Error on deserialize airport", e);
                 throw new RuntimeException(e);
