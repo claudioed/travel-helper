@@ -4,6 +4,7 @@ import api.domain.AirportQuery;
 import api.domain.TravelQuery;
 import api.domain.airport.TravelAirports;
 import api.domain.car.CarQuery;
+import api.domain.flight.FlightQuery;
 import api.domain.hotel.HotelQuery;
 import api.domain.points.PointQuery;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,6 +44,9 @@ public class ApiVerticle extends AbstractVerticle {
               final String leaveDate = LocalDateTime.now().plusDays(8).format(DateTimeFormatter.ISO_DATE);
               final TravelAirports airports = MAPPER.readValue(reply.result().body().toString(), TravelAirports.class);
               LOGGER.info(String.format("travel airports RECEIVED from %s to %s",airports.getOrigin().toString(),airports.getDestination().toString()));
+              final FlightQuery flightQuery = FlightQuery.builder().origin(airports.getOrigin())
+                  .destination(airports.getDestination()).departureAt(arriveDate).days(8).build();
+              vertx.eventBus().publish(Endpoints.FLIGHTS_REQUESTER_EB,MAPPER.writeValueAsString(flightQuery));
               final CarQuery carQuery = CarQuery.builder().airport(airports.getDestination())
                   .pickUp(arriveDate).dropOf(leaveDate).build();
               vertx.eventBus().publish(Endpoints.CARS_REQUESTER_EB,MAPPER.writeValueAsString(carQuery));

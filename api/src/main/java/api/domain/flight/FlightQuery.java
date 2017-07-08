@@ -1,14 +1,19 @@
-package flights.domain;
+package api.domain.flight;
 
+import api.domain.airport.Airport;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-
-import java.time.LocalDateTime;
+import lombok.NoArgsConstructor;
 
 /**
  * Location Query
  * Created by claudio on 07/07/17.
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class FlightQuery {
 
   Airport origin;

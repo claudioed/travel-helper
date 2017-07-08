@@ -1,5 +1,6 @@
 package flights.infra;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import flights.domain.FlightQuery;
 import flights.infra.response.FlightResponse;
@@ -37,13 +38,21 @@ public class RequestFlightsVerticle extends AbstractVerticle {
     this.vertx.eventBus().consumer(FLIGHTS_REQUESTER_EB, handler -> {
       try {
         final FlightQuery flightQuery = MAPPER.readValue(handler.body().toString(), FlightQuery.class);
+        LOGGER.info(String.format("Receiving flight request from %s to %s",flightQuery.getOrigin().getLabel(),flightQuery.getDestination().getLabel()));
         final String target = String.format(FLIGHTS_URI, apiKey, flightQuery.getOrigin().getValue(),
-            flightQuery.getDestination().getValue(), flightQuery.departure(), flightQuery.getDays());
-        webClient.get(target).rxSend().subscribe(bufferHttpResponse -> {
+            flightQuery.getDestination().getValue(), flightQuery.getDepartureAt(), flightQuery.getDays());
+        webClient.getAbs(target).rxSend().subscribe(bufferHttpResponse -> {
           try {
             final FlightResponse flightResponse = MAPPER.readValue(bufferHttpResponse.bodyAsString(), FlightResponse.class);
-            Observable.from(flightResponse.getResults()).delaySubscription(2, TimeUnit.SECONDS)
-                .subscribe(data -> vertx.eventBus().send(FLIGHTS_DATA_STREAM, data));
+            Observable.from(flightResponse.getResults()).delaySubscription(5, TimeUnit.SECONDS)
+                .subscribe(data -> {
+                  try {
+                    LOGGER.info("Sending new flight. Company Name " + data.getAirline());
+                    vertx.eventBus().send(FLIGHTS_DATA_STREAM, MAPPER.writeValueAsString(data));
+                  } catch (JsonProcessingException e) {
+                    LOGGER.error("Error on serialize flight response",e);
+                  }
+                });
           } catch (IOException e) {
             LOGGER.error("Error on deserialize flight response",e);
           }

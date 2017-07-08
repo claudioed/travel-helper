@@ -13,4 +13,6 @@ public class Endpoints {
 
   public static final String POINTS_REQUESTER_EB = "request-points-eb";
 
+  public static final String FLIGHTS_REQUESTER_EB = "request-flight-eb";
+
 }
