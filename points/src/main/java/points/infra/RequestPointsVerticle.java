@@ -25,7 +25,7 @@ public class RequestPointsVerticle extends AbstractVerticle {
 
   private static final String POINTS_DATA_STREAM = "";
 
-  private static final String POINTS_REQUESTER_EB = "";
+  private static final String POINTS_REQUESTER_EB = "request-points-eb";
 
   @Override
   public void start() throws Exception {

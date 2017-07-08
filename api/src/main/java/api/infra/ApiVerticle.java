@@ -2,6 +2,8 @@ package api.infra;
 
 import api.domain.AirportQuery;
 import api.domain.TravelQuery;
+import api.domain.airport.TravelAirports;
+import api.domain.car.CarQuery;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -9,14 +11,13 @@ import io.vertx.rxjava.core.AbstractVerticle;
 import io.vertx.rxjava.ext.web.Router;
 import io.vertx.rxjava.ext.web.handler.BodyHandler;
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 /**
  * Api Verticle
  * @author claudioed on 08/07/17. Project travel-helper
  */
 public class ApiVerticle extends AbstractVerticle {
-
-  private static final String AIRPORT_REQUESTER_EB = "request-airports-eb";
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -32,7 +33,19 @@ public class ApiVerticle extends AbstractVerticle {
         LOGGER.info(String.format("Receiving travel request from %s to %s",query.getOrigin(),query.getDestination()));
         final AirportQuery airportQuery = AirportQuery.builder().destination(query.getDestination())
             .origin(query.getOrigin()).build();
-        vertx.eventBus().publish(AIRPORT_REQUESTER_EB,MAPPER.writeValueAsString(airportQuery));
+        vertx.eventBus().send(Endpoints.AIRPORT_REQUESTER_EB,MAPPER.writeValueAsString(airportQuery),reply -> {
+          if(reply.succeeded()){
+            try {
+              final TravelAirports airports = MAPPER.readValue(reply.result().body().toString(), TravelAirports.class);
+              LOGGER.info(String.format("travel airports RECEIVED from %s to %s",airports.getOrigin().toString(),airports.getDestination().toString()));
+              final CarQuery carQuery = CarQuery.builder().airport(airports.getDestination())
+                  .pickUp(LocalDateTime.now()).dropOf(LocalDateTime.now().plusDays(8)).build();
+              vertx.eventBus().publish(Endpoints.CARS_REQUESTER_EB,MAPPER.writeValueAsString(carQuery));
+            } catch (IOException e) {
+              LOGGER.error("Error on deserialize travel airports",e);
+            }
+          }
+        });
         ctx.response().putHeader("Content-Type", "application/json");
         ctx.response().end();
       } catch (IOException e) {

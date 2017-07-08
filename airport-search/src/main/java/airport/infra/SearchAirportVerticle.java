@@ -61,6 +61,7 @@ public class SearchAirportVerticle extends AbstractVerticle {
               }
             }).subscribe(data -> {
           try {
+            handler.reply(MAPPER.writeValueAsString(data));
             vertx.eventBus().send(AIRPORT_DATA_STREAM,MAPPER.writeValueAsString(data));
           } catch (JsonProcessingException e) {
             LOGGER.error("Error on send message to airport event bus", e);

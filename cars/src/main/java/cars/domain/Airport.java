@@ -11,6 +11,6 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Airport {
 
-  String airport;
+  String value;
 
 }
