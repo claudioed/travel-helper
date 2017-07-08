@@ -12,7 +12,7 @@
   <artifactId>flights</artifactId>
 
   <properties>
-    <vertx.verticle>infra.verticle.MainVerticle</vertx.verticle>
+    <vertx.verticle>flights.infra.MainVerticle</vertx.verticle>
   </properties>
 
   <dependencies>
@@ -35,6 +35,11 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-rx-java</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-hazelcast</artifactId>
     </dependency>
 
     <dependency>
