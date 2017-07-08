@@ -4,6 +4,7 @@ import api.domain.AirportQuery;
 import api.domain.TravelQuery;
 import api.domain.airport.TravelAirports;
 import api.domain.car.CarQuery;
+import api.domain.points.PointQuery;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -45,6 +46,8 @@ public class ApiVerticle extends AbstractVerticle {
               final CarQuery carQuery = CarQuery.builder().airport(airports.getDestination())
                   .pickUp(pickUp).dropOf(dropOf).build();
               vertx.eventBus().publish(Endpoints.CARS_REQUESTER_EB,MAPPER.writeValueAsString(carQuery));
+              final PointQuery pointQuery = PointQuery.builder().place(query.getDestination()).build();
+              vertx.eventBus().publish(Endpoints.POINTS_REQUESTER_EB,MAPPER.writeValueAsString(pointQuery));
             } catch (IOException e) {
               LOGGER.error("Error on deserialize travel airports",e);
             }

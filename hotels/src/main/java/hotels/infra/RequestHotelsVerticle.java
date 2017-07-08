@@ -39,8 +39,8 @@ public class RequestHotelsVerticle extends AbstractVerticle {
       try {
         final HotelQuery hotelQuery = MAPPER.readValue(handler.body().toString(), HotelQuery.class);
         final String target = String
-            .format(HOTELS_URI, apiKey, hotelQuery.getAirport().getAirport(), hotelQuery.checkIn(),
-                hotelQuery.checkOut());
+            .format(HOTELS_URI, apiKey, hotelQuery.getAirport().getAirport(), hotelQuery.getCheckIn(),
+                hotelQuery.getCheckOut());
         webClient.get(target).rxSend().subscribe(bufferHttpResponse -> {
           try {
             final HotelResponse hotelResponse = MAPPER

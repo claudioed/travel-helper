@@ -73,7 +73,6 @@ public class SearchAirportVerticle extends AbstractVerticle {
     });
   }
 
-  public static final TypeReference<List<Airport>> AIRPORT_RESPONSE = new TypeReference<List<Airport>>() {
-  };
+  public static final TypeReference<List<Airport>> AIRPORT_RESPONSE = new TypeReference<List<Airport>>() {};
 
 }

@@ -1,7 +1,6 @@
 package api.domain.hotel;
 
 import api.domain.airport.Airport;
-import java.time.LocalDateTime;
 import lombok.Data;
 
 /**
@@ -13,16 +12,8 @@ public class HotelQuery {
 
   Airport airport;
 
-  LocalDateTime checkIn;
+  String checkIn;
 
-  LocalDateTime checkOut;
-
-  public String checkIn() {
-    return this.checkIn.toString();
-  }
-
-  public String checkOut() {
-    return this.checkOut.toString();
-  }
+  String checkOut;
 
 }
