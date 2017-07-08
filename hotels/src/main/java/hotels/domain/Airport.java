@@ -9,6 +9,8 @@ import lombok.Data;
 @Data
 public class Airport {
 
-    String airport;
+  String value;
+
+  String label;
 
 }

@@ -1,5 +1,6 @@
 package hotels.infra;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hotels.domain.HotelQuery;
 import hotels.infra.response.HotelResponse;
@@ -38,15 +39,22 @@ public class RequestHotelsVerticle extends AbstractVerticle {
     this.vertx.eventBus().consumer(HOTELS_REQUESTER_EB, handler -> {
       try {
         final HotelQuery hotelQuery = MAPPER.readValue(handler.body().toString(), HotelQuery.class);
+        LOGGER.info("Searching hotels in " + hotelQuery.getAirport().getLabel());
         final String target = String
-            .format(HOTELS_URI, apiKey, hotelQuery.getAirport().getAirport(), hotelQuery.getCheckIn(),
+            .format(HOTELS_URI, apiKey, hotelQuery.getAirport().getValue(), hotelQuery.getCheckIn(),
                 hotelQuery.getCheckOut());
-        webClient.get(target).rxSend().subscribe(bufferHttpResponse -> {
+        webClient.getAbs(target).rxSend().subscribe(bufferHttpResponse -> {
           try {
-            final HotelResponse hotelResponse = MAPPER
-                .readValue(bufferHttpResponse.bodyAsString(), HotelResponse.class);
-            Observable.from(hotelResponse.getResults()).delaySubscription(2, TimeUnit.SECONDS)
-                .subscribe(data -> vertx.eventBus().send(HOTELS_DATA_STREAM, data));
+            final HotelResponse hotelResponse = MAPPER.readValue(bufferHttpResponse.bodyAsString(), HotelResponse.class);
+            Observable.from(hotelResponse.getResults()).delaySubscription(5, TimeUnit.SECONDS)
+                .subscribe(data -> {
+                  try {
+                    LOGGER.info("Sending new hotel " + data.getPropertyName());
+                    vertx.eventBus().send(HOTELS_DATA_STREAM, MAPPER.writeValueAsString(data));
+                  } catch (JsonProcessingException e) {
+                    LOGGER.error("Error on serialize object",e);
+                  }
+                });
           } catch (Exception ex) {
             LOGGER.error("Error on deserialize object");
           }
