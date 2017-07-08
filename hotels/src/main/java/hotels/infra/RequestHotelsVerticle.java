@@ -46,7 +46,7 @@ public class RequestHotelsVerticle extends AbstractVerticle {
         webClient.getAbs(target).rxSend().subscribe(bufferHttpResponse -> {
           try {
             final HotelResponse hotelResponse = MAPPER.readValue(bufferHttpResponse.bodyAsString(), HotelResponse.class);
-            Observable.from(hotelResponse.getResults()).delaySubscription(5, TimeUnit.SECONDS)
+            Observable.from(hotelResponse.getResults()).delaySubscription(2, TimeUnit.SECONDS)
                 .subscribe(data -> {
                   try {
                     LOGGER.info("Sending new hotel " + data.getPropertyName());

@@ -12,7 +12,7 @@
   <artifactId>ui</artifactId>
 
   <properties>
-    <vertx.verticle>infra.verticle.MainVerticle</vertx.verticle>
+    <vertx.verticle>ui.infra.MainVerticle</vertx.verticle>
   </properties>
 
   <dependencies>
@@ -87,7 +87,7 @@
         <configuration>
           <images>
             <image>
-              <name>claudioed/travel-helper-points</name>
+              <name>claudioed/travel-helper-ui</name>
               <build>
                 <from>openjdk:latest</from>
                 <entryPoint>java -jar /application/${project.build.finalName}.jar</entryPoint>
@@ -108,7 +108,7 @@
                   <tag>latest</tag>
                 </tags>
                 <ports>
-                  <port>8010</port>
+                  <port>9090</port>
                 </ports>
               </build>
               <run>
