@@ -8,8 +8,17 @@
 
 <h1>Travel Helper</h1>
 
-<div id="log"></div>
+<h2>Hotels</h2>
+<div id="hotels"></div>
 
+<h2>Cars</h2>
+<div id="cars"></div>
+
+<h2>Points of Interest</h2>
+<div id="points"></div>
+
+<h2>Flights</h2>
+<div id="flights"></div>
 
 <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
 <script src="//cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js"></script>
@@ -18,9 +27,27 @@
   var eb = new EventBus('/eventbus/');
   eb.onopen = function () {
     eb.registerHandler('available-hotels-eb', function (err, msg) {
-      $('#log').prepend('<div>' + msg.body + '</div>');
+      console.log('HOTELS');
+      $('#hotels').prepend('<div>' + msg.body + '</div>');
     });
+
+    eb.registerHandler('available-cars-eb', function (err, msg) {
+      console.log('HOTELS');
+      $('#cars').prepend('<div>' + msg.body + '</div>');
+    });
+
+    eb.registerHandler('available-points-eb', function (err, msg) {
+      console.log('POINTS');
+      $('#points').prepend('<div>' + msg.body + '</div>');
+    });
+
+    eb.registerHandler('available-flights-eb', function (err, msg) {
+      console.log('FLIGHTS');
+      $('#flights').prepend('<div>' + msg.body + '</div>');
+    });
+
   };
+
 </script>
 
 </body>

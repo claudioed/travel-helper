@@ -45,7 +45,6 @@ public class RequestCarsVerticle extends AbstractVerticle {
           try {
             final CarRentalResponse carRentalResponse = MAPPER
                 .readValue(bufferHttpResponse.bodyAsString(), CarRentalResponse.class);
-
             Observable.from(carRentalResponse.getResults()).delaySubscription(5, TimeUnit.SECONDS)
                 .subscribe(data -> {
                   try {
