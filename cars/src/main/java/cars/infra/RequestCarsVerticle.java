@@ -37,6 +37,7 @@ public class RequestCarsVerticle extends AbstractVerticle {
     this.vertx.eventBus().consumer(CARS_REQUESTER_EB, handler -> {
       try {
         final CarQuery carQuery = MAPPER.readValue(handler.body().toString(), CarQuery.class);
+        LOGGER.info(String.format("Receiving car request for %s ", carQuery.getAirport().getValue()));
         final String target = String
             .format(CARS_URI, apiKey, carQuery.getAirport().getValue(), carQuery.getPickUp(),
                 carQuery.getDropOf());
@@ -45,9 +46,10 @@ public class RequestCarsVerticle extends AbstractVerticle {
             final CarRentalResponse carRentalResponse = MAPPER
                 .readValue(bufferHttpResponse.bodyAsString(), CarRentalResponse.class);
 
-            Observable.from(carRentalResponse.getResults()).delaySubscription(2, TimeUnit.SECONDS)
+            Observable.from(carRentalResponse.getResults()).delaySubscription(5, TimeUnit.SECONDS)
                 .subscribe(data -> {
                   try {
+                    LOGGER.info("Sending new car offer. Company " + data.getProvider().getCompanyName());
                     vertx.eventBus().send(CARS_DATA_STREAM, MAPPER.writeValueAsString(data));
                   } catch (JsonProcessingException e) {
                     LOGGER.error("Error on deserialize car element", e);

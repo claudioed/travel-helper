@@ -1,6 +1,7 @@
 package cars.infra.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.List;
 import lombok.Data;
 
 /**
@@ -15,6 +16,6 @@ public class CarRentalData {
 
   String airport;
 
-  VehicleOffer cars;
+  List<VehicleOffer> cars;
 
 }
