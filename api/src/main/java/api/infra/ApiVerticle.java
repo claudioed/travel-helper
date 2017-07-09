@@ -8,11 +8,13 @@ import api.domain.flight.FlightQuery;
 import api.domain.hotel.HotelQuery;
 import api.domain.points.PointQuery;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.rxjava.core.AbstractVerticle;
 import io.vertx.rxjava.ext.web.Router;
 import io.vertx.rxjava.ext.web.handler.BodyHandler;
+import io.vertx.rxjava.ext.web.handler.CorsHandler;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,6 +33,13 @@ public class ApiVerticle extends AbstractVerticle {
   public void start() throws Exception {
     final Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());
+
+    router.route().handler(CorsHandler.create("*")
+        .allowedMethod(HttpMethod.GET)
+        .allowedMethod(HttpMethod.POST)
+        .allowedMethod(HttpMethod.OPTIONS)
+        .allowedHeader("Content-Type"));
+
     router.post("/api/travel").handler(ctx -> {
       try {
         final TravelQuery query = MAPPER.readValue(ctx.getBodyAsString("utf-8"), TravelQuery.class);
