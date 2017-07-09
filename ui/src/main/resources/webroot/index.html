@@ -3,8 +3,116 @@
 <head>
   <meta charset="UTF-8">
   <title>Travel Helper</title>
+  <link rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+        crossorigin="anonymous">
 </head>
 <body>
+
+<div class="container">
+
+  <div class="row">
+
+    <div class="container" id="flights-container">
+
+      <div class="row">
+
+        <div class="panel panel-info">
+
+          <div class="panel-heading">
+            <h3 class="panel-title">Flights</h3>
+          </div>
+          <div class="panel-body">
+            Panel content
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="container" id="points-container">
+
+      <div class="row">
+
+        <div class="panel panel-info">
+
+          <div class="panel-heading">
+            <h3 class="panel-title">Points</h3>
+          </div>
+          <div class="panel-body">
+            Panel content
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="container" id="hotels-container">
+
+      <div class="row">
+
+        <div class="panel panel-info">
+
+          <div class="panel-heading">
+            <h3 class="panel-title">Hotels</h3>
+          </div>
+          <div class="panel-body">
+
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Firstname</th>
+                  <th>Lastname</th>
+                  <th>Email</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>John</td>
+                  <td>Doe</td>
+                  <td>john@example.com</td>
+                </tr>
+              </tbody>
+            </table>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="container" id="cars-container">
+
+      <div class="row">
+
+        <div class="panel panel-info">
+
+          <div class="panel-heading">
+            <h3 class="panel-title">Cars</h3>
+          </div>
+          <div class="panel-body">
+            Panel content
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
 
 <h1>Travel Helper</h1>
 
@@ -20,9 +128,12 @@
 <h2>Flights</h2>
 <div id="flights"></div>
 
-<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="//cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js"></script>
 <script src="node_modules/vertx3-eventbus-client/vertx-eventbus.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
 <script>
   var eb = new EventBus('/eventbus/');
   eb.onopen = function () {
@@ -33,6 +144,9 @@
 
     eb.registerHandler('available-cars-eb', function (err, msg) {
       console.log('HOTELS');
+
+
+
       $('#cars').prepend('<div>' + msg.body + '</div>');
     });
 
