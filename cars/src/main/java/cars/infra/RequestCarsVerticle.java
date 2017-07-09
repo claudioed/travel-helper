@@ -6,13 +6,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.vertx.circuitbreaker.CircuitBreakerOptions;
+import io.vertx.core.Handler;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.rxjava.circuitbreaker.CircuitBreaker;
 import io.vertx.rxjava.core.AbstractVerticle;
+import io.vertx.rxjava.core.Future;
+import io.vertx.rxjava.core.buffer.Buffer;
+import io.vertx.rxjava.ext.web.client.HttpResponse;
 import io.vertx.rxjava.ext.web.client.WebClient;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import rx.Observable;
+import rx.Single;
 
 /**
  * Request Cars
@@ -34,6 +41,16 @@ public class RequestCarsVerticle extends AbstractVerticle {
   public void start() throws Exception {
     final String apiKey = System.getenv("AMADEUS_API_KEY");
     final WebClient webClient = WebClient.create(this.vertx);
+
+    final CircuitBreakerOptions cbOptions = new CircuitBreakerOptions()
+        .setMaxFailures(10)
+        .setTimeout(4000L)
+        .setResetTimeout(8000L)
+        .setMaxRetries(2)
+        .setFallbackOnFailure(true);
+
+    final CircuitBreaker circuitBreaker = CircuitBreaker.create("cars-cb",this.vertx,cbOptions);
+
     this.vertx.eventBus().consumer(CARS_REQUESTER_EB, handler -> {
       try {
         final CarQuery carQuery = MAPPER.readValue(handler.body().toString(), CarQuery.class);
@@ -41,24 +58,17 @@ public class RequestCarsVerticle extends AbstractVerticle {
         final String target = String
             .format(CARS_URI, apiKey, carQuery.getAirport().getValue(), carQuery.getPickUp(),
                 carQuery.getDropOf());
-        webClient.getAbs(target).rxSend().subscribe(bufferHttpResponse -> {
+        final Single<HttpResponse<Buffer>> httpResponseSingle = webClient.getAbs(target).rxSend();
+        circuitBreaker
+            .rxExecuteCommand(
+                (Handler<Future<HttpResponse<Buffer>>>) future -> httpResponseSingle.subscribe(future::complete)).subscribe(el -> {
           try {
-            final CarRentalResponse carRentalResponse = MAPPER
-                .readValue(bufferHttpResponse.bodyAsString(), CarRentalResponse.class);
-            Observable.from(carRentalResponse.getResults()).delaySubscription(5, TimeUnit.SECONDS)
-                .subscribe(data -> {
-                  try {
-                    LOGGER.info("Sending new car offer. Company " + data.getProvider().getCompanyName());
-                    vertx.eventBus().send(CARS_DATA_STREAM, MAPPER.writeValueAsString(data));
-                  } catch (JsonProcessingException e) {
-                    LOGGER.error("Error on deserialize car element", e);
-                  }
-                });
+            final CarRentalResponse carRentalResponse = MAPPER.readValue(el.bodyAsString(), CarRentalResponse.class);
+            vertx.eventBus().send(CARS_DATA_STREAM, MAPPER.writeValueAsString(carRentalResponse));
           } catch (IOException e) {
-            LOGGER.error("Error on deserialize car response", e);
+            LOGGER.error("Error on deserialize cars",e);
           }
         });
-
       } catch (IOException e) {
         LOGGER.error("Error on deserialize car query", e);
       }

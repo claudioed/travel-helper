@@ -43,6 +43,11 @@
     </dependency>
 
     <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-circuit-breaker</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
@@ -106,9 +111,6 @@
                   <tag>${project.version}</tag>
                   <tag>latest</tag>
                 </tags>
-                <ports>
-                  <port>8000</port>
-                </ports>
               </build>
               <run>
                 <namingStrategy>alias</namingStrategy>

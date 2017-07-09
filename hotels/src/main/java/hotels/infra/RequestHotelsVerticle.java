@@ -4,17 +4,24 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hotels.domain.HotelQuery;
 import hotels.infra.response.HotelResponse;
+import io.vertx.circuitbreaker.CircuitBreakerOptions;
+import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.rxjava.circuitbreaker.CircuitBreaker;
 import io.vertx.rxjava.core.AbstractVerticle;
+import io.vertx.rxjava.core.Future;
+import io.vertx.rxjava.core.buffer.Buffer;
+import io.vertx.rxjava.ext.web.client.HttpResponse;
 import io.vertx.rxjava.ext.web.client.WebClient;
 import java.io.IOException;
 import lombok.SneakyThrows;
 import rx.Observable;
 
 import java.util.concurrent.TimeUnit;
+import rx.Single;
 
 /**
  * Request Hotels
@@ -36,6 +43,16 @@ public class RequestHotelsVerticle extends AbstractVerticle {
   public void start() throws Exception {
     final String apiKey = System.getenv("AMADEUS_API_KEY");
     final WebClient webClient = WebClient.create(this.vertx);
+
+    final CircuitBreakerOptions cbOptions = new CircuitBreakerOptions()
+        .setMaxFailures(10)
+        .setTimeout(4000L)
+        .setResetTimeout(8000L)
+        .setMaxRetries(2)
+        .setFallbackOnFailure(true);
+
+    final CircuitBreaker circuitBreaker = CircuitBreaker.create("hotels-cb",this.vertx,cbOptions);
+
     this.vertx.eventBus().consumer(HOTELS_REQUESTER_EB, handler -> {
       try {
         final HotelQuery hotelQuery = MAPPER.readValue(handler.body().toString(), HotelQuery.class);
@@ -43,26 +60,20 @@ public class RequestHotelsVerticle extends AbstractVerticle {
         final String target = String
             .format(HOTELS_URI, apiKey, hotelQuery.getAirport().getValue(), hotelQuery.getCheckIn(),
                 hotelQuery.getCheckOut());
-        webClient.getAbs(target).rxSend().subscribe(bufferHttpResponse -> {
+        final Single<HttpResponse<Buffer>> httpResponseSingle = webClient.getAbs(target).rxSend();
+        circuitBreaker
+            .rxExecuteCommand(
+                (Handler<Future<HttpResponse<Buffer>>>) future -> httpResponseSingle.subscribe(future::complete)).subscribe(el -> {
           try {
-            final HotelResponse hotelResponse = MAPPER.readValue(bufferHttpResponse.bodyAsString(), HotelResponse.class);
-            Observable.from(hotelResponse.getResults()).delaySubscription(2, TimeUnit.SECONDS)
-                .subscribe(data -> {
-                  try {
-                    LOGGER.info("Sending new hotel " + data.getPropertyName());
-                    vertx.eventBus().send(HOTELS_DATA_STREAM, MAPPER.writeValueAsString(data));
-                  } catch (JsonProcessingException e) {
-                    LOGGER.error("Error on serialize object",e);
-                  }
-                });
-          } catch (Exception ex) {
-            LOGGER.error("Error on deserialize object");
+            final HotelResponse hotelResponse = MAPPER.readValue(el.bodyAsString(), HotelResponse.class);
+            vertx.eventBus().send(HOTELS_DATA_STREAM, MAPPER.writeValueAsString(hotelResponse));
+          } catch (IOException e) {
+            LOGGER.error("Error on deserialize hotels",e);
           }
-        }, throwable -> LOGGER.error("Error on try to get HOTELS", throwable));
+        });
       } catch (IOException e) {
-        LOGGER.error("Error on deserialize object");
+        LOGGER.error("Error on deserialize hotel query");
       }
-
     });
   }
 
