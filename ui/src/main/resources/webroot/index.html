@@ -66,7 +66,7 @@
           <input type="text" class="form-control" id="destination"
                  placeholder="Destination">
         </div>
-        <button type="submit" class="btn btn-primary">Go!!!</button>
+        <button id="searchButton" class="btn btn-primary">Go!!!</button>
       </form>
 
     </div>
@@ -236,29 +236,24 @@
     });
   };
 
-  function processForm( e ){
 
-    var values = { origin : $("#origin").val(), destination : $("#destination").val()};
+  $('#searchButton').click(function() {
 
-    console.log(values);
+    var searchData = { origin : $("#origin").val(), destination : $("#destination").val()};
+    console.log(searchData);
 
-    $.post({
+    $.ajax({
       url: 'http://localhost:8888/api/travel',
       contentType: 'application/json',
-      data: values,
-      success: function( data, textStatus, jQxhr ){
-        $('#response pre').html( data );
-      },
-      error: function( jqXhr, textStatus, errorThrown ){
-        console.log( errorThrown );
+      dataType:'json',
+      type: 'POST',
+      data: JSON.stringify(searchData),
+      success: function (result) {
+        console.log("OK");
       }
     });
 
-    e.preventDefault();
-  }
-
-  $( "#searchForm" ).submit( processForm );
-
+  });
 
 </script>
 
