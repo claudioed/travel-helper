@@ -61,6 +61,8 @@ public class RequestPointsVerticle extends AbstractVerticle {
               } catch (IOException e) {
                 LOGGER.error("Error on deserialize points",e);
               }
+        },throwable -> {
+          LOGGER.error("Error on call places api",throwable);
         });
       } catch (IOException e) {
         LOGGER.error("Error on deserialize object");
