@@ -7,6 +7,7 @@ import api.domain.car.CarQuery;
 import api.domain.flight.FlightQuery;
 import api.domain.hotel.HotelQuery;
 import api.domain.points.PointQuery;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.logging.Logger;
@@ -18,6 +19,7 @@ import io.vertx.rxjava.ext.web.handler.CorsHandler;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 /**
  * Api Verticle
@@ -51,19 +53,26 @@ public class ApiVerticle extends AbstractVerticle {
             try {
               final String arriveDate = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE);
               final String leaveDate = LocalDateTime.now().plusDays(8).format(DateTimeFormatter.ISO_DATE);
-              final TravelAirports airports = MAPPER.readValue(reply.result().body().toString(), TravelAirports.class);
-              LOGGER.info(String.format("travel airports RECEIVED from %s to %s",airports.getOrigin().toString(),airports.getDestination().toString()));
-              final FlightQuery flightQuery = FlightQuery.builder().origin(airports.getOrigin())
-                  .destination(airports.getDestination()).departureAt(arriveDate).days(8).build();
-              vertx.eventBus().publish(Endpoints.FLIGHTS_REQUESTER_EB,MAPPER.writeValueAsString(flightQuery));
-              final CarQuery carQuery = CarQuery.builder().airport(airports.getDestination())
-                  .pickUp(arriveDate).dropOf(leaveDate).build();
-              vertx.eventBus().publish(Endpoints.CARS_REQUESTER_EB,MAPPER.writeValueAsString(carQuery));
+              List<TravelAirports> options = MAPPER.readValue(reply.result().body().toString(),new TypeReference<List<TravelAirports>>(){});
               final PointQuery pointQuery = PointQuery.builder().place(query.getDestination()).build();
               vertx.eventBus().publish(Endpoints.POINTS_REQUESTER_EB,MAPPER.writeValueAsString(pointQuery));
-              final HotelQuery hotelQuery = HotelQuery.builder().airport(airports.getDestination())
-                  .checkIn(arriveDate).checkOut(leaveDate).build();
-              vertx.eventBus().publish(Endpoints.HOTELS_REQUESTER_EB,MAPPER.writeValueAsString(hotelQuery));
+
+              options.parallelStream().forEach(option -> {
+                try {
+                  LOGGER.info(String.format("travel airports RECEIVED from %s to %s",option.getOrigin().toString(),option.getDestination().toString()));
+                  final FlightQuery flightQuery = FlightQuery.builder().origin(option.getOrigin())
+                      .destination(option.getDestination()).departureAt(arriveDate).days(8).build();
+                  vertx.eventBus().publish(Endpoints.FLIGHTS_REQUESTER_EB,MAPPER.writeValueAsString(flightQuery));
+                  final CarQuery carQuery = CarQuery.builder().airport(option.getDestination())
+                      .pickUp(arriveDate).dropOf(leaveDate).build();
+                  vertx.eventBus().publish(Endpoints.CARS_REQUESTER_EB,MAPPER.writeValueAsString(carQuery));
+                  final HotelQuery hotelQuery = HotelQuery.builder().airport(option.getDestination())
+                      .checkIn(arriveDate).checkOut(leaveDate).build();
+                  vertx.eventBus().publish(Endpoints.HOTELS_REQUESTER_EB,MAPPER.writeValueAsString(hotelQuery));
+                }catch (IOException e) {
+                  LOGGER.error("Error on deserialize travel airports",e);
+                }
+              });
             } catch (IOException e) {
               LOGGER.error("Error on deserialize travel airports",e);
             }

@@ -16,6 +16,8 @@ public class FlightResponse {
 
   String origin;
 
+  String destination;
+
   String currency;
 
   List<Flight> results;
