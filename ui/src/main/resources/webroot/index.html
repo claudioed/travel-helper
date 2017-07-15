@@ -83,26 +83,19 @@
           <h3 class="panel-title">Flights</h3>
         </div>
         <div class="panel-body">
-          Panel content
-        </div>
 
-      </div>
-
-    </div>
-
-  </div>
-
-  <div class="row">
-
-    <div class="container" id="points-container">
-
-      <div class="panel panel-info">
-
-        <div class="panel-heading">
-          <h3 class="panel-title">Points</h3>
-        </div>
-        <div class="panel-body">
-          Panel content
+          <table class="table table-hover" id="flightsData">
+            <thead>
+            <tr>
+              <th>Company</th>
+              <th>Departure</th>
+              <th>Return Date</th>
+              <th>Price</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
         </div>
 
       </div>
@@ -122,20 +115,15 @@
         </div>
         <div class="panel-body">
 
-          <table class="table table-hover">
+          <table class="table table-hover" id="hotelsData">
             <thead>
             <tr>
-              <th>Firstname</th>
-              <th>Lastname</th>
-              <th>Email</th>
+              <th>Name</th>
+              <th>Price</th>
+              <th>Currency</th>
             </tr>
             </thead>
             <tbody>
-            <tr>
-              <td>John</td>
-              <td>Doe</td>
-              <td>john@example.com</td>
-            </tr>
             </tbody>
           </table>
 
@@ -157,7 +145,20 @@
           <h3 class="panel-title">Cars</h3>
         </div>
         <div class="panel-body">
-          Panel content
+
+          <table class="table table-hover" id="carsData">
+            <thead>
+            <tr>
+              <th>Category</th>
+              <th>Transmission</th>
+              <th>Price</th>
+              <th>Currency</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+
         </div>
 
       </div>
@@ -166,22 +167,11 @@
 
   </div>
 
+  <div id="pointsData">
+
+  </div>
+
 </div>
-
-
-<h1>Travel Helper</h1>
-
-<h2>Hotels</h2>
-<div id="hotels"></div>
-
-<h2>Cars</h2>
-<div id="cars"></div>
-
-<h2>Points of Interest</h2>
-<div id="points"></div>
-
-<h2>Flights</h2>
-<div id="flights"></div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="//cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js"></script>
@@ -194,25 +184,56 @@
   eb.onopen = function () {
     eb.registerHandler('available-hotels-eb', function (err, msg) {
       console.log('HOTELS');
-      $('#hotels').prepend('<div>' + msg.body + '</div>');
+      var hotelsResult = JSON.parse(msg.body);
+      hotelsResult.results.forEach(function (hotel, index) {
+        console.log('New Hotel ' + JSON.stringify(hotel));
+        $("#hotelsData").find('tbody')
+        .append($('<tr>')
+        .append($('<td>').text(hotel.property_name))
+        .append($('<td>').text(hotel.total_price.amount))
+        .append($('<td>').text(hotel.total_price.currency)));
+      });
     });
 
     eb.registerHandler('available-cars-eb', function (err, msg) {
-      console.log('HOTELS');
+      console.log('CARS');
+      var carsResult = JSON.parse(msg.body);
+      carsResult.results.forEach(function (element, index) {
+        console.log('New Car Data ' + JSON.stringify(element));
+        element.cars.forEach(function (car, index) {
+          console.log('New Car ' + JSON.stringify(car));
+          $("#carsData").find('tbody')
+          .append($('<tr>')
+          .append($('<td>').text(car.vehicle_info.category))
+          .append($('<td>').text(car.vehicle_info.transmission))
+          .append($('<td>').text(car.estimated_total.amount))
+          .append($('<td>').text(car.estimated_total.currency))
+          );
+        });
+      });
+    });
 
-      $('#cars').prepend('<div>' + msg.body + '</div>');
+    eb.registerHandler('available-flights-eb', function (err, msg) {
+      var flightsResult = JSON.parse(msg.body);
+      flightsResult.results.forEach(function (flight, index) {
+        console.log('New Flight ' + JSON.stringify(flight));
+        $("#flightsData").find('tbody')
+                  .append($('<tr>')
+                  .append($('<td>').text(flight.airline))
+                  .append($('<td>').text(flight.departure_date))
+                  .append($('<td>').text(flight.return_date))
+                  .append($('<td>').text(flight.price)));
+      });
     });
 
     eb.registerHandler('available-points-eb', function (err, msg) {
       console.log('POINTS');
-      $('#points').prepend('<div>' + msg.body + '</div>');
+      var pointsResult = JSON.parse(msg.body);
+      pointsResult.points_of_interest.forEach(function (point, index) {
+        console.log('New Point ' + JSON.stringify(point));
+        $("#pointsData").append($('<div>').addClass("row").append($('<div>').addClass("container").append($('<div>').addClass("panel").addClass("panel-info").append($('<div>').addClass("panel-heading").append($('<h3>').addClass("panel-title").text(point.title))).append($('<div>').addClass("panel-body").append($('<img>',{id: point.title,src:point.main_image,class: "img-responsive",alt:point.title}))))));
+      });
     });
-
-    eb.registerHandler('available-flights-eb', function (err, msg) {
-      console.log('FLIGHTS');
-      $('#flights').prepend('<div>' + msg.body + '</div>');
-    });
-
   };
 
   function processForm( e ){

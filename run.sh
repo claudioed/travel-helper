@@ -32,8 +32,3 @@ echo "Running points..."
 cd ..
 cd points
 mvn vertx:run &
-
-echo "Running UI..."
-cd ..
-cd ui
-mvn vertx:run &
