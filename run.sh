@@ -2,23 +2,38 @@
 
 mvn clean install
 
+export AMADEUS_API_KEY=vAXkLMLUJZZGf1XTD9Lq7vrQOrJUCQkt
+
 echo "Running airport..."
-nohup java -jar airport-search/target/airport-helper.jar > airport.log &
+cd airport-search
+mvn vertx:run &
 
 echo "Running api..."
-nohup java -jar api/target/api-helper.jar > api.log &
+cd ..
+cd api
+mvn vertx:run &
 
 echo "Running cars..."
-nohup java -jar cars/target/cars-helper.jar > cars.log &
+cd ..
+cd cars
+mvn vertx:run &
 
 echo "Running flights..."
-nohup java -jar flights/target/flights-helper.jar > flights.log &
+cd ..
+cd flights
+mvn vertx:run &
 
 echo "Running hotels..."
-nohup java -jar hotels/target/hotels-helper.jar > hotels.log &
+cd ..
+cd hotels
+mvn vertx:run &
 
 echo "Running points..."
-nohup java -jar points/target/points-helper.jar > points.log &
+cd ..
+cd points
+mvn vertx:run &
 
 echo "Running UI..."
-nohup java -jar ui/target/ui.jar > ui.log &
+cd ..
+cd ui
+mvn vertx:run &
